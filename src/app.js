@@ -1,9 +1,14 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import dotenv from 'dotenv';
-import { gadgetRouter } from './routes/gadgetRoutes';
+import { gadgetRouter } from './routes/gadgetRoutes.js';
 import swaggerUi from 'swagger-ui-express';
-import swaggerDocument from './swagger.json';
+import { readFileSync } from 'fs';
+
+const swaggerDocument = JSON.parse(
+  readFileSync(new URL('./swagger.json', import.meta.url))
+);
+
 
 dotenv.config();
 

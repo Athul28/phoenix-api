@@ -1,15 +1,25 @@
-import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import jwt from 'jsonwebtoken';
 
-const secret = process.env.JWT_SECRET || 'secretkey';
+const SECRET_KEY = process.env.JWT_SECRET || 'defaultsecret';
 
-export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
-  const token = req.header('Authorization')?.split(' ')[1];
-  if (!token) return res.status(403).send('Access denied');
+interface AuthRequest extends Request {
+  user?: { userId: string };
+}
 
-  jwt.verify(token, secret, (err, user) => {
-    if (err) return res.status(403).send('Invalid token');
-    req.user = user;
+// Middleware to authenticate JWT token
+export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const token = req.header('Authorization')?.split(' ')[1]; // Extract token from header
+
+  if (!token) {
+    return res.status(401).json({ message: 'Access Denied: No token provided' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY) as { userId: string };
+    req.user = { userId: decoded.userId }; // Attach user ID to request
     next();
-  });
+  } catch (error) {
+    return res.status(403).json({ message: 'Invalid or expired token' });
+  }
 };
