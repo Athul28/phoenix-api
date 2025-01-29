@@ -4,24 +4,30 @@ const prisma = new PrismaClient();
 import { uniqueNamesGenerator } from "unique-names-generator";
 import { adjectives, animals } from "unique-names-generator";
 
-
 const router = express.Router();
 
 // GET /gadgets
 router.get("/", async (req, res) => {
+  const { status } = req.query;
   try {
-    const gadgets = await prisma.gadget.findMany();
-    const gadgetsWithProbability = gadgets.map((gadget) => ({
-      ...gadget,
-      missionSuccessProbability: `${uniqueNamesGenerator({
-        dictionaries: [adjectives, animals], // You can replace with custom word lists
-        separator: " ",
-        style: "capital"
-      })} - ${Math.floor(
-        Math.random() * 101
-      )}% success probability`,
-    }));
-    res.json(gadgetsWithProbability);
+    if (status) {
+      const gadgets = await prisma.gadget.findMany();
+      const filteredGadgets = gadgets.filter((g) => 
+        g.status.toLowerCase() === status.toLowerCase()
+      );
+      res.json(filteredGadgets);
+    } else {
+      const gadgets = await prisma.gadget.findMany();
+      const gadgetsWithProbability = gadgets.map((gadget) => ({
+        ...gadget,
+        missionSuccessProbability: `${uniqueNamesGenerator({
+          dictionaries: [adjectives, animals], // You can replace with custom word lists
+          separator: " ",
+          style: "capital",
+        })} - ${Math.floor(Math.random() * 101)}% success probability`,
+      }));
+      res.json(gadgetsWithProbability);
+    }
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch gadgets" });
   }
@@ -29,14 +35,13 @@ router.get("/", async (req, res) => {
 
 // POST /gadgets
 router.post("/", async (req, res) => {
-  const { name } = req.body;
   const codename = uniqueNamesGenerator({
     dictionaries: [adjectives, animals], // You can replace with custom word lists
     separator: " ",
-    style: "capital"
+    style: "capital",
   }); // Random codename generation
   const gadget = await prisma.gadget.create({
-    data: { name:codename, status: "Available" },
+    data: { name: codename, status: "Available" },
   });
   res.status(201).json(gadget);
 });
@@ -48,8 +53,8 @@ router.patch("/:id", async (req, res) => {
 
   try {
     const gadget = await prisma.gadget.update({
-      where: { id },
-      data: { name, status },
+      where: { id: id },
+      data: { name, status, updatedAt: new Date() },
     });
     res.json(gadget);
   } catch (error) {
@@ -82,6 +87,23 @@ router.post("/:id/self-destruct", async (req, res) => {
     code: confirmationCode,
   });
 });
+
+// GET /gadgets?status={status} - Fetch gadgets by status
+// router.get("/", async (req, res) => {
+//   const { status } = req.query;
+
+//   console.log(status)
+
+//   try {
+//     const gadgets=await prisma.gadget.findMany()
+
+//     const filteredGadgets = gadgets.filter((g)=>{g.status.toLowerCase() === status.toLowerCase()})
+
+//     res.json(filteredGadgets);
+//   } catch (error) {
+//     res.status(500).json({ error: "Failed to fetch gadgets" });
+//   }
+// });
 
 function generateConfirmationCode() {
   return Math.floor(100000 + Math.random() * 900000); // Random 6-digit code
