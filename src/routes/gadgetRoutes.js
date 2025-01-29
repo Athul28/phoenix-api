@@ -1,13 +1,26 @@
 import express from "express";
 import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
 const prisma = new PrismaClient();
 import { uniqueNamesGenerator } from "unique-names-generator";
 import { adjectives, animals } from "unique-names-generator";
 
 const router = express.Router();
 
+// Middleware to authenticate JWT token
+function authenticateJWT(req, res, next) {
+  const token = req.header("Authorization")?.replace("Bearer ", "");
+  if (!token) return res.status(403).json({ message: "No token provided" });
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ message: "Invalid token" });
+    req.user = user; // Add user info to request
+    next();
+  });
+}
+
 // GET /gadgets
-router.get("/", async (req, res) => {
+router.get("/", authenticateJWT, async (req, res) => {
   const { status } = req.query;
   try {
     if (status) {
@@ -21,7 +34,7 @@ router.get("/", async (req, res) => {
       const gadgetsWithProbability = gadgets.map((gadget) => ({
         ...gadget,
         missionSuccessProbability: `${uniqueNamesGenerator({
-          dictionaries: [adjectives, animals], // You can replace with custom word lists
+          dictionaries: [adjectives, animals],
           separator: " ",
           style: "capital",
         })} - ${Math.floor(Math.random() * 101)}% success probability`,
@@ -34,9 +47,9 @@ router.get("/", async (req, res) => {
 });
 
 // POST /gadgets
-router.post("/", async (req, res) => {
+router.post("/", authenticateJWT, async (req, res) => {
   const codename = uniqueNamesGenerator({
-    dictionaries: [adjectives, animals], // You can replace with custom word lists
+    dictionaries: [adjectives, animals],
     separator: " ",
     style: "capital",
   }); // Random codename generation
@@ -47,7 +60,7 @@ router.post("/", async (req, res) => {
 });
 
 // PATCH /gadgets/:id
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", authenticateJWT, async (req, res) => {
   const { id } = req.params;
   const { name, status } = req.body;
 
@@ -63,7 +76,7 @@ router.patch("/:id", async (req, res) => {
 });
 
 // DELETE /gadgets/:id
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authenticateJWT, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -78,7 +91,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 // POST /gadgets/:id/self-destruct
-router.post("/:id/self-destruct", async (req, res) => {
+router.post("/:id/self-destruct", authenticateJWT, async (req, res) => {
   const { id } = req.params;
   const confirmationCode = generateConfirmationCode(); // Random code generation
   // Confirm code (skipping actual validation for this example)
@@ -87,23 +100,6 @@ router.post("/:id/self-destruct", async (req, res) => {
     code: confirmationCode,
   });
 });
-
-// GET /gadgets?status={status} - Fetch gadgets by status
-// router.get("/", async (req, res) => {
-//   const { status } = req.query;
-
-//   console.log(status)
-
-//   try {
-//     const gadgets=await prisma.gadget.findMany()
-
-//     const filteredGadgets = gadgets.filter((g)=>{g.status.toLowerCase() === status.toLowerCase()})
-
-//     res.json(filteredGadgets);
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to fetch gadgets" });
-//   }
-// });
 
 function generateConfirmationCode() {
   return Math.floor(100000 + Math.random() * 900000); // Random 6-digit code

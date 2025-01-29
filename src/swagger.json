@@ -5,10 +5,23 @@
     "title": "IMF Gadget API",
     "description": "API for managing gadgets in the IMF."
   },
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "JWT Authorization header using the Bearer scheme"
+    }
+  },
   "paths": {
     "/gadgets": {
       "get": {
         "summary": "Get all gadgets (with optional status filter)",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "status",
@@ -38,6 +51,11 @@
       },
       "post": {
         "summary": "Add a new gadget",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "gadget",
@@ -58,6 +76,11 @@
     "/gadgets/{id}": {
       "get": {
         "summary": "Get a specific gadget",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -80,6 +103,11 @@
       },
       "patch": {
         "summary": "Update a specific gadget",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -113,6 +141,11 @@
       },
       "delete": {
         "summary": "Delete a specific gadget",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
