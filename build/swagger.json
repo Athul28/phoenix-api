@@ -1,0 +1,81 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "IMF Gadget API",
+        "description": "API for managing gadgets in the IMF."
+    },
+    "paths": {
+        "/gadgets": {
+            "get": {
+                "summary": "Get all gadgets",
+                "responses": {
+                    "200": {
+                        "description": "A list of gadgets",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Gadget"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Add a new gadget",
+                "parameters": [
+                    {
+                        "name": "gadget",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/Gadget"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Gadget added"
+                    }
+                }
+            }
+        },
+        "/gadgets/{id}": {
+            "get": {
+                "summary": "Get a specific gadget",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A gadget object",
+                        "schema": {
+                            "$ref": "#/definitions/Gadget"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Gadget": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}
