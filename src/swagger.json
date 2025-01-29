@@ -163,6 +163,47 @@
           }
         }
       }
+    },
+    "/gadgets/{id}/self-destruct": {
+      "post": {
+        "summary": "Trigger the self-destruct sequence for a gadget",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the gadget to trigger self-destruct"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Self-destruct sequence triggered",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "confirmationCode": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Gadget not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
     }
   },
   "definitions": {
@@ -170,7 +211,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "integer"
+          "type": "string"
         },
         "name": {
           "type": "string"

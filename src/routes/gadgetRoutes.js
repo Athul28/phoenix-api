@@ -25,8 +25,8 @@ router.get("/", authenticateJWT, async (req, res) => {
   try {
     if (status) {
       const gadgets = await prisma.gadget.findMany();
-      const filteredGadgets = gadgets.filter((g) => 
-        g.status.toLowerCase() === status.toLowerCase()
+      const filteredGadgets = gadgets.filter(
+        (g) => g.status.toLowerCase() === status.toLowerCase()
       );
       res.json(filteredGadgets);
     } else {
@@ -98,6 +98,20 @@ router.post("/:id/self-destruct", authenticateJWT, async (req, res) => {
   res.json({
     message: "Self-destruct sequence triggered",
     code: confirmationCode,
+  });
+});
+
+// POST /gadgets/:id/self-destruct
+router.post("/:id/self-destruct", async (req, res) => {
+  const { id } = req.params;
+
+  // Generate a random confirmation code (6-digit code)
+  const confirmationCode = Math.floor(100000 + Math.random() * 900000); // Random 6-digit code
+
+  // Respond with the confirmation code
+  res.json({
+    message: "Self-destruct sequence triggered",
+    confirmationCode: confirmationCode,
   });
 });
 
