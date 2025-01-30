@@ -55,7 +55,8 @@ app.get("/", (req, res) => {
         <script>
             function copyToken() {
                 const tokenTextarea = document.getElementById("jwtToken");
-                navigator.clipboard.writeText(tokenTextarea.value)
+                const token = tokenTextarea.value.trim();  // Trim spaces & newlines
+                navigator.clipboard.writeText(token)
                     .then(() => alert("JWT Token copied to clipboard"))
                     .catch(err => console.error("Failed to copy: ", err));
             }
@@ -63,7 +64,6 @@ app.get("/", (req, res) => {
     </body>
     </html>
   `);
-  
 });
 
 app.use(express.json());
